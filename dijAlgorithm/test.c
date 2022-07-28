@@ -1,4 +1,3 @@
-//Sho Reagan 1001925250
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
