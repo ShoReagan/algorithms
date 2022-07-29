@@ -8,14 +8,14 @@
 typedef struct vertex 
 {
 	int index;
-	char label;
+	char label[6];
 	int distance;
 	int previous;
 	int visited;
 }
 VERTEX;
 
-void ReadFileIntoArr(int argc, char *argv[], VERTEX VertexArray[MAX], int matrix[][MAX])
+int ReadFileIntoArr(int argc, char *argv[], VERTEX VertexArray[], int matrix[][MAX])
 {
 	FILE *fp;
 	char buffer[16];
@@ -44,7 +44,10 @@ void ReadFileIntoArr(int argc, char *argv[], VERTEX VertexArray[MAX], int matrix
 		buffer[strlen(buffer) - 1] = '\0';
 		token = strtok(buffer, ",");
 		VertexArray[counter].index = counter;
-		VertexArray[counter].label = token[0];
+		VertexArray[counter].visited = 0;
+		VertexArray[counter].previous = -1;
+		VertexArray[counter].distance = INT_MAX;
+		strcpy(VertexArray[counter].label, token);
 		while(token != NULL)
 		{
 			token = strtok(NULL, ",");
@@ -56,6 +59,7 @@ void ReadFileIntoArr(int argc, char *argv[], VERTEX VertexArray[MAX], int matrix
 		}
 		counter++;
 	}
+	return counter;
 }
 
 void PrintArr(int matrix[][MAX])
@@ -75,15 +79,13 @@ void PrintVertexArr(VERTEX VertexArray[MAX])
 	printf("I    L    D    P    V\n");
 	for(int i = 0; i < MAX; i++)
 	{
-		printf("%-5d%-5c%-5d%-5d%-5d\n", VertexArray[i].index, VertexArray[i].label, VertexArray[i].distance, VertexArray[i].previous, VertexArray[i].visited);
+		printf("%-5d%-5s%-5d%-5d %-5d\n", VertexArray[i].index, VertexArray[i].label, VertexArray[i].distance, VertexArray[i].previous, VertexArray[i].visited);
 	}
 }
 
-int main(int argc, char *argv[])
+void dijAlgo(VERTEX VertexArray[MAX], int matrix[][MAX], int counter)
 {
-	int matrix[MAX][MAX];
-	VERTEX VertexArray[MAX];
-	char startingVertex = ' ';
+	char startingVertex[6] = " ";
 	int CurrentVertex = 0;
 	int x;
 	int i;
@@ -92,24 +94,13 @@ int main(int argc, char *argv[])
 	int cofuv;
 	int dofv;
 	int SmallestVertexIndex;
-	
-	for(i = 0; i < MAX; i++)
-	{
-		for(j = 0; j < MAX; j++)
-		{
-			matrix[i][j] = -1;
-		}
-	}
-
-	ReadFileIntoArr(argc, argv, VertexArray, matrix);
-	PrintArr(matrix);
 
 	printf("\nWhat is the starting vertex? ");
-	scanf("%c", &startingVertex);
+	scanf("%s", startingVertex);
 
-	for(i = 0; i < MAX; i++)
+	for(i = 0; i < counter; i++)
 	{
-		if(VertexArray[i].label == startingVertex)
+		if(!strcmp(VertexArray[i].label, startingVertex))
 			CurrentVertex = VertexArray[i].index;
 	}
 
@@ -117,9 +108,9 @@ int main(int argc, char *argv[])
 	VertexArray[CurrentVertex].previous = -1;
 	VertexArray[CurrentVertex].visited = 1;
 
-	for (x = 0; x < MAX-1; x++)
+	for (x = 0; x < counter-1; x++)
 	{
-		for(i = 0; i < MAX; i++)
+		for(i = 0; i < counter; i++)
 		{
 			if (matrix[CurrentVertex][i] != -1 && !VertexArray[i].visited)  
 			{
@@ -141,7 +132,7 @@ int main(int argc, char *argv[])
 		SmallestVertexIndex = -1;
 		int SmallestVertex = INT_MAX;
 
-		for(i = 0; i < MAX; i++)
+		for(i = 0; i < counter; i++)
 		{
 			if (!VertexArray[i].visited)
 			{
@@ -155,6 +146,29 @@ int main(int argc, char *argv[])
 		CurrentVertex = SmallestVertexIndex;
 		VertexArray[CurrentVertex].visited = 1;
 	}
+
+}
+
+int main(int argc, char *argv[])
+{
+	int counter;
+	int i;
+	int j;
+	int matrix[MAX][MAX];
+	VERTEX VertexArray[MAX];
+	
+	for(i = 0; i < MAX; i++)
+	{
+		for(j = 0; j < MAX; j++)
+		{
+			matrix[i][j] = -1;
+		}
+	}
+
+	counter = ReadFileIntoArr(argc, argv, VertexArray, matrix);
+	PrintArr(matrix);
+
+	dijAlgo(VertexArray, matrix, counter);
 
 	PrintVertexArr(VertexArray);	
 
